@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Platform, StatusBar as RNStatusBar } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, Platform, StatusBar as RNStatusBar, Image, Button } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import Task from './src/components/Task';
-import { addTask, deleteTask, getAllTasks, updateTask, TaskItem } from './src/utils/handle-api';
+import TaskList from './src/components/TaskList';
+import { addTask, deleteTask, getAllTasks, updateTask, clearAllTasks, TaskItem } from './src/utils/handle-api';
 
 export default function App() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
@@ -23,14 +23,25 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+        <Image
+          source={require('./assets/task-app-banner.png')}
+          style={styles.headerImage}
+          resizeMode="contain"
+        />
         <Text style={styles.header}>Tarefas</Text>
+        <View style={styles.counterWrap}>
+          <Text style={styles.counterText}>Total de tarefas: {tasks.length}</Text>
+        </View>
 
         <View style={styles.top}>
           <TextInput
             style={styles.input}
-            placeholder="Adicione uma tarefa..."
+            placeholder="Descreva sua próxima tarefa..."
             value={text}
             onChangeText={(val) => setText(val)}
+            maxLength={80}
+            autoCapitalize="sentences"
+            returnKeyType="done"
           />
 
           <TouchableOpacity
@@ -46,17 +57,23 @@ export default function App() {
             </Text>
           </TouchableOpacity>
         </View>
+        <Text style={styles.inputHint}>{text.length}/80 caracteres</Text>
 
-        <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
-          {tasks.map((item) => (
-            <Task
-              key={item._id}
-              text={item.text}
-              updateMode={() => updateMode(item._id, item.text)}
-              deleteToDo={() => deleteTask(item._id, setTasks)}
-            />
-          ))}
-        </ScrollView>
+        <View style={styles.clearButtonWrap}>
+          <Button
+            title="Excluir todas as tarefas"
+            color="#b3261e"
+            onPress={() => clearAllTasks(tasks, setTasks)}
+          />
+        </View>
+
+        <View style={styles.list}>
+          <TaskList
+            tasks={tasks}
+            onEditTask={updateMode}
+            onDeleteTask={(taskItemId) => deleteTask(taskItemId, setTasks)}
+          />
+        </View>
       </View>
       <StatusBar style="auto" />
     </SafeAreaView>
@@ -76,25 +93,42 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     paddingHorizontal: 16,
   },
+  headerImage: {
+    marginTop: 10,
+    alignSelf: 'center',
+    width: '100%',
+    height: 88,
+  },
   header: {
-    marginTop: 16,
+    marginTop: 8,
     textAlign: 'center',
     fontSize: 24,
     fontWeight: 'bold',
   },
+  counterWrap: {
+    marginTop: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  counterText: {
+    fontSize: 15,
+    color: '#2f2f2f',
+  },
   top: {
     marginTop: 16,
     flexDirection: 'row',
-    gap: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+    gap: 12,
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
   },
   input: {
     flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#000',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: '#a8a8a8',
+    borderRadius: 8,
+    backgroundColor: '#f6f6f6',
     fontSize: 16,
   },
   addButton: {
@@ -110,11 +144,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  inputHint: {
+    marginTop: 6,
+    color: '#6b6b6b',
+    fontSize: 12,
+  },
+  clearButtonWrap: {
+    marginTop: 12,
+    alignSelf: 'flex-start',
+  },
   list: {
     marginTop: 16,
     flex: 1,
   },
-  listContent: {
-    paddingBottom: 24,
-  }
 });

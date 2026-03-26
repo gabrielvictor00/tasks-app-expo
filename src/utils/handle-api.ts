@@ -56,3 +56,18 @@ export const deleteTask = (
     })
     .catch((err) => console.log(err));
 };
+
+export const clearAllTasks = (
+  tasks: TaskItem[],
+  setTasks: React.Dispatch<React.SetStateAction<TaskItem[]>>
+) => {
+  if (!tasks.length) {
+    return;
+  }
+
+  Promise.all(tasks.map((task) => axios.post(`${baseURL}/delete`, { _id: task._id })))
+    .then(() => {
+      getAllTasks(setTasks);
+    })
+    .catch((err) => console.log(err));
+};
