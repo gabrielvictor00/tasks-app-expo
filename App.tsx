@@ -6,6 +6,7 @@ import { addTask, deleteTask, getAllTasks, updateTask, clearAllTasks, TaskItem }
 
 export default function App() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [completedTaskIds, setCompletedTaskIds] = useState<string[]>([]);
   const [text, setText] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [taskId, setTaskId] = useState("");
@@ -14,10 +15,38 @@ export default function App() {
     getAllTasks(setTasks);
   }, []);
 
+  useEffect(() => {
+    setCompletedTaskIds((previousCompletedTaskIds) =>
+      previousCompletedTaskIds.filter((id) => tasks.some((task) => task._id === id))
+    );
+  }, [tasks]);
+
   const updateMode = (_id: string, text: string) => {
     setIsUpdating(true);
     setText(text);
     setTaskId(_id);
+  };
+
+  const toggleTaskCompletion = (taskItemId: string) => {
+    setCompletedTaskIds((previousCompletedTaskIds) => {
+      if (previousCompletedTaskIds.includes(taskItemId)) {
+        return previousCompletedTaskIds.filter((id) => id !== taskItemId);
+      }
+
+      return [...previousCompletedTaskIds, taskItemId];
+    });
+  };
+
+  const handleDeleteTask = (taskItemId: string) => {
+    setCompletedTaskIds((previousCompletedTaskIds) =>
+      previousCompletedTaskIds.filter((id) => id !== taskItemId)
+    );
+    deleteTask(taskItemId, setTasks);
+  };
+
+  const handleClearAllTasks = () => {
+    setCompletedTaskIds([]);
+    clearAllTasks(tasks, setTasks);
   };
 
   return (
@@ -31,6 +60,7 @@ export default function App() {
         <Text style={styles.header}>Tarefas</Text>
         <View style={styles.counterWrap}>
           <Text style={styles.counterText}>Total de tarefas: {tasks.length}</Text>
+          <Text style={styles.counterText}>Concluídas: {completedTaskIds.length}</Text>
         </View>
 
         <View style={styles.top}>
@@ -63,15 +93,17 @@ export default function App() {
           <Button
             title="Excluir todas as tarefas"
             color="#b3261e"
-            onPress={() => clearAllTasks(tasks, setTasks)}
+            onPress={handleClearAllTasks}
           />
         </View>
 
         <View style={styles.list}>
           <TaskList
             tasks={tasks}
+            completedTaskIds={completedTaskIds}
             onEditTask={updateMode}
-            onDeleteTask={(taskItemId) => deleteTask(taskItemId, setTasks)}
+            onDeleteTask={handleDeleteTask}
+            onToggleCompleteTask={toggleTaskCompletion}
           />
         </View>
       </View>

@@ -4,16 +4,26 @@ import { Feather, AntDesign } from '@expo/vector-icons';
 
 interface TaskItemProps {
 	text: string;
+	isCompleted: boolean;
 	onEdit: () => void;
 	onDelete: () => void;
+	onToggleComplete: () => void;
 }
 
-const TaskItem: React.FC<TaskItemProps> = ({ text, onEdit, onDelete }) => {
+const TaskItem: React.FC<TaskItemProps> = ({ text, isCompleted, onEdit, onDelete, onToggleComplete }) => {
 	return (
-		<View style={styles.itemContainer}>
-			<Text style={styles.itemText}>{text}</Text>
+		<View style={[styles.itemContainer, isCompleted && styles.itemContainerCompleted]}>
+			<Text style={[styles.itemText, isCompleted && styles.itemTextCompleted]}>{text}</Text>
 
 			<View style={styles.actions}>
+				<TouchableOpacity onPress={onToggleComplete} accessibilityLabel="Marcar tarefa como concluida">
+					<Feather
+						name={isCompleted ? 'rotate-ccw' : 'check-circle'}
+						size={20}
+						color="#fff"
+						style={styles.icon}
+					/>
+				</TouchableOpacity>
 				<TouchableOpacity onPress={onEdit} accessibilityLabel="Editar tarefa">
 					<Feather name="edit" size={20} color="#fff" style={styles.icon} />
 				</TouchableOpacity>
@@ -36,10 +46,17 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'space-between',
 	},
+	itemContainerCompleted: {
+		backgroundColor: '#1f7a45',
+	},
 	itemText: {
 		color: '#fff',
 		fontSize: 16,
 		flex: 1,
+	},
+	itemTextCompleted: {
+		textDecorationLine: 'line-through',
+		opacity: 0.9,
 	},
 	actions: {
 		flexDirection: 'row',
