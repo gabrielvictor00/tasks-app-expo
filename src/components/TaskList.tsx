@@ -31,7 +31,7 @@ const TaskList: React.FC<TaskListProps> = ({
       data: tasks.filter((task) => !completedIdsSet.has(task._id)),
     },
     {
-      title: 'Concluidas',
+      title: 'Concluídas',
       data: tasks.filter((task) => completedIdsSet.has(task._id)),
     },
   ];
@@ -57,17 +57,20 @@ const TaskList: React.FC<TaskListProps> = ({
       renderItem={({ item }) => (
         <TaskItem
           text={item.text}
+          dueDate={item.dueDate}
           isCompleted={completedIdsSet.has(item._id)}
           onEdit={() => onEditTask(item._id, item.text)}
           onDelete={() => onDeleteTask(item._id)}
           onToggleComplete={() => onToggleCompleteTask(item._id)}
         />
       )}
-      ListEmptyComponent={!hasTasks ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Nenhuma tarefa cadastrada.</Text>
-        </View>
-      ) : null}
+      ListEmptyComponent={
+        !hasTasks ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Nenhuma tarefa cadastrada.</Text>
+          </View>
+        ) : null
+      }
     />
   );
 };
